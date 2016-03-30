@@ -43,14 +43,13 @@
 We are also going to implement lock-free hash tables. 
 Finally we're going to analyze the implementations of each of them by testing them on different programs with different data access patterns.</p>
 
-<p><strong>BACKGROUND.</strong> If your project involves accelerating a compute-intensive application, describe the application or piece of the application you are going to implement in more detail. This description need only be a few paragraphs. It might be helpful to include a block diagram or pseudocode of the basic idea. An important detail is what aspects of the problem might benefit from parallelism? and why?</p>
+<p><strong>BACKGROUND.</strong> A hash table is a data structure that maps keys to values and allows fast accesses to the data.
+More on hash tables: https://en.wikipedia.org/wiki/Hash_table</p>
 
-<p><strong>THE CHALLENGE.</strong> Describe why the problem is challenging. What aspects of the problem might make it difficult to parallelize?  In other words, what to you hope to learn by doing the project?</p>
-
-<ul>
-<li>Describe the workload: what are the dependencies, what are its memory access characteristics? (is there locality? is there a high communication to computation ratio?), is there divergent execution?</li>
-<li>Describe constraints: What are the properties of the system that make mapping the workload to it challenging?</li>
-</ul>
+<p><strong>THE CHALLENGE.</strong>
+The problem is challenging because lock-free data structures are hard, 
+for instance if we implement the hash tables with separate chaining then deletion is going to be an issue.
+Another problem would be resizing the hash table on an insert and ensuring that is still lock-free. </p>
 
 <p><strong>RESOURCES.</strong> Describe the resources (type of computers, starter code, etc.) you will use. What code base will you start from? Are you starting from scratch or using an existing piece of code? Is there a book or paper that you are using as a reference (if so, provide a citation)? Are there any other resources you need, but haven't figured out how to obtain yet?  Could you benefit from access to any special machines?</p>
 
