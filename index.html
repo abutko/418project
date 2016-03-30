@@ -44,14 +44,17 @@ We are also going to implement lock-free hash tables.
 Finally we're going to analyze the implementations of each of them by testing them on different programs with different data access patterns.</p>
 
 <p><strong>BACKGROUND.</strong> A hash table is a data structure that maps keys to values and allows fast accesses to the data.
-More on hash tables: https://en.wikipedia.org/wiki/Hash_table</p>
+More on hash tables: <a href="https://en.wikipedia.org/wiki/Hash_table" /></p>
 
 <p><strong>THE CHALLENGE.</strong>
 The problem is challenging because lock-free data structures are hard, 
 for instance if we implement the hash tables with separate chaining then deletion is going to be an issue.
 Another problem would be resizing the hash table on an insert and ensuring that is still lock-free. </p>
 
-<p><strong>RESOURCES.</strong> Describe the resources (type of computers, starter code, etc.) you will use. What code base will you start from? Are you starting from scratch or using an existing piece of code? Is there a book or paper that you are using as a reference (if so, provide a citation)? Are there any other resources you need, but haven't figured out how to obtain yet?  Could you benefit from access to any special machines?</p>
+<p><strong>RESOURCES.</strong> 
+We will be using C++ for the coding aspects of this assignment and the GHC machines for testing/analyzing the performance of the code.
+We will most likely start the code from scratch but will be using ideas from research papers to supplement the implementation. 
+<a href="http://www.research.ibm.com/people/m/michael/spaa-2002.pdf" /> looks promising. </p>
 
 <p><strong>GOALS AND DELIVERABLES.</strong> Describe the deliverables or goals of your project.</p>
 
