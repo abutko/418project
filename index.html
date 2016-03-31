@@ -33,9 +33,7 @@
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
         <h3>
-<a id="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
-
-<p>Please create a web page for your project. Your project page should contain the following sections and content:</p>
+<a id="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Parallel Hash Tables.</h3>
 
 <p><strong>TITLE.</strong> Parallel Hash Tables. Brought to you by Manu Garg, Andrew Butko.</p>
 
@@ -56,23 +54,61 @@ We will be using C++ for the coding aspects of this assignment and the GHC machi
 We will most likely start the code from scratch but will be using ideas from research papers to supplement the implementation. 
 <a href="http://www.research.ibm.com/people/m/michael/spaa-2002.pdf">research paper</a> looks promising. </p>
 
-<p><strong>GOALS AND DELIVERABLES.</strong> Describe the deliverables or goals of your project.</p>
-
-<p>This is by far the most important section of the proposal:</p>
+<p><strong>GOALS AND DELIVERABLES.</strong></p>
 
 <ul>
-<li>Separate your goals into what you PLAN TO ACHIEVE (what you believe you must get done to have a successful project and get the grade you expect) and an extra goal or two that you HOPE TO ACHIEVE if the project goes really well and you get ahead of schedule. It may not be possible to state precise performance goals at this time, but we encourage you be as precise as possible. If you do state a goal, give some justification of why you think you can achieve it.  (e.g., I hope to speed up my starter code 10x, because if I did it would run in real-time.)</li>
-<li>If applicable, describe the demo you plan to show at the parallelism computation (will it be an interactive demo? will you show an output of the program that is really neat? will you show speedup graphs?).  Specifically, what will you show us that will demonstrate you did a good job?</li>
-<li>If your project is an analysis project, what are you hoping to learn about the workload or system being studied? What question(s) do you plan to answer in your analysis?</li>
-<li>Systems project proposals should describe what the system will be capable of and what performance is hoped to be achieved.</li>
+<li> PLAN TO ACHIEVE: We plan to implement several versions of locking on hash tables (coarse, fine) along with a lock free version based on the paper above. Along with this, we plan to do a performance analysis comparing these implementations and would like to achieve similar results to the listed paper.  A similar project was completed in a previous semester, so this should be achieveable. </li>
+<li> HOPE TO ACHIEVE: If we find time, we'd like to investigate implementing a binary decision diagram interface on top of the parallel hash tables. We also plan to investigate using the RMC system for implementing our system. </li>
 </ul>
 
 <p><strong>PLATFORM CHOICE.</strong> Describe why the platform (computer and/or language) you have chosen is a good one for your needs. Why does it make sense to use this parallel system for the workload you have chosen?</p>
 
-<p><strong>SCHEDULE.</strong> Produce a schedule for your project.  <em>Your schedule should have at least one item to do per week</em>. List what you plan to get done each week from now until the parallelism competition in order to meet your project goals. Keep in mind that due to other classes, you'll have more time to work some weeks than others (work that into the schedule). You will need to re-evaluate your progress at the end of each week and update this schedule accordingly. Note the intermediate checkpoint deadline is April 16th. In your schedule we encourage you to be precise as precise as possible. It's often helpful to work backward in time from your deliverables and goals, writing down all the little things you'll need to do (establish the dependencies!).</p>
+<p>
+<table class="projectSchedule">
+<tr>
+  <td width="110"><span style="font-weight: bold;">Week</span></td>
+  <td width="380"><span style="font-weight: bold;">Goals</span></td>
+</tr>
+<tr>
+  <td>April 3-9</td>
+  <td>Brainstorm ideas for project.</td>
+</tr>
 
-<h2>Project Checkpoint (due Fri, April 15th)</h2>
+<tr>
+  <td>April 10-16</td>
+  <td>
+    Obtain starter code and start parallelizing with different granularity
+    locks.
+  </td>
+</tr>
 
+<tr>
+  <td>April 17-23</td>
+  <td>
+    Play around with different workloads and come up with a way to make the
+    hash table lock-free.
+  </td>
+</tr>
+
+<tr>
+  <td>April 24-30</td>
+  <td>
+    Implement the lock-free version (lock-free resize???), and do performance
+    evaluation.
+  </td>
+</tr>
+
+<tr>
+  <td>May 1-7</td>
+  <td>
+    Attempt to optimize for memory accesses (not thrashing the cache). If last
+    part was successful, begin porting to GPU and evaluate performance.
+  </td>
+</tr>
+
+</table>
+</p>
+<!--
 <p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here <a href="https://guides.github.com/features/mastering-markdown/">using GitHub Flavored Markdown</a>, select a template crafted by a designer, and publish. After your page is generated, you can check out the new <code>gh-pages</code> branch locally. If you’re using GitHub Desktop, simply sync your repository and you’ll see the new branch.</p>
 
 <h3>
@@ -97,14 +133,14 @@ We will most likely start the code from scratch but will be using ideas from res
       </section>
     </div>
 
-    <!-- FOOTER  -->
+    
     <div id="footer_wrap" class="outer">
       <footer class="inner">
         <p class="copyright">418project maintained by <a href="https://github.com/abutko">abutko</a></p>
         <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
-
+-->
     
 
   </body>
