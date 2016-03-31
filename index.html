@@ -59,9 +59,10 @@ We will most likely start the code from scratch but will be using ideas from res
 <ul>
 <li> PLAN TO ACHIEVE: We plan to implement several versions of locking on hash tables (coarse, fine) along with a lock free version based on the paper above. Along with this, we plan to do a performance analysis comparing these implementations and would like to achieve similar results to the listed paper.  A similar project was completed in a previous semester, so this should be achieveable. </li>
 <li> HOPE TO ACHIEVE: If we find time, we'd like to investigate implementing a binary decision diagram interface on top of the parallel hash tables. We also plan to investigate using the RMC system for implementing our system. </li>
+<li> Because the research paper shows a performance analysis for different workloads, we will use a similar set of tests to check our performance. We can present our results as a speedup graph and hopefully meet or exceed these results. </li>
 </ul>
 
-<p><strong>PLATFORM CHOICE.</strong> Describe why the platform (computer and/or language) you have chosen is a good one for your needs. Why does it make sense to use this parallel system for the workload you have chosen?</p>
+<p><strong>PLATFORM CHOICE.</strong> We will implement this using C++ (as this was the suggested comparison for RMC) and tentatively do performance testing on the Gates clusters or Latedays. We will figure out which machines best match what was used in the research paper for testing and go with that to have a better measure of our performance. </p>
 
 <p>
 <table class="projectSchedule">
@@ -71,38 +72,34 @@ We will most likely start the code from scratch but will be using ideas from res
 </tr>
 <tr>
   <td>April 3-9</td>
-  <td>Brainstorm ideas for project.</td>
+  <td>Read listed papers and research RMC model. Plan interface and testing suite and produce a benchmark for future tests. </td>
 </tr>
 
 <tr>
   <td>April 10-16</td>
   <td>
-    Obtain starter code and start parallelizing with different granularity
-    locks.
+    Implement fine and coarse locking schemes for the checkpoint. Compare performance with sequential benchmarks.
   </td>
 </tr>
 
 <tr>
   <td>April 17-23</td>
   <td>
-    Play around with different workloads and come up with a way to make the
-    hash table lock-free.
+    Implement lock-free version and do performance analysis. Begin to compile final report.
   </td>
 </tr>
 
 <tr>
   <td>April 24-30</td>
   <td>
-    Implement the lock-free version (lock-free resize???), and do performance
-    evaluation.
+    Extra time for BDD if progress is going well, buffer week to catch up if progress is slow.
   </td>
 </tr>
 
 <tr>
   <td>May 1-7</td>
   <td>
-    Attempt to optimize for memory accesses (not thrashing the cache). If last
-    part was successful, begin porting to GPU and evaluate performance.
+    Prepare presentation and attempt any optimizations (though this is finals week, so we likely won't get much done here).
   </td>
 </tr>
 
