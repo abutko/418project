@@ -8,6 +8,7 @@ public:
     HashMap() {
         // construct zero initialized hash table of size
         table = new HashNode<K, V> *[TABLE_SIZE]();
+        capacity = TABLE_SIZE;
     }
 
     ~HashMap() {
@@ -26,7 +27,7 @@ public:
     }
 
     bool get(const K &key, V &value) {
-        unsigned long hashValue = hashFunc(key);
+        unsigned long hashValue = hashFunc(key) % capacity;
         HashNode<K, V> *entry = table[hashValue];
 
         while (entry != NULL) {
@@ -40,7 +41,10 @@ public:
     }
 
     void put(const K &key, const V &value) {
-        unsigned long hashValue = hashFunc(key);
+        if((size/capacity) >= 21)
+            resize();
+
+        unsigned long hashValue = hashFunc(key) % capacity;
         HashNode<K, V> *prev = NULL;
         HashNode<K, V> *entry = table[hashValue];
 
@@ -57,6 +61,7 @@ public:
             } else {
                 prev->setNext(entry);
             }
+            size++;
         } else {
             // just update the value
             entry->setValue(value);
@@ -64,7 +69,7 @@ public:
     }
 
     void remove(const K &key) {
-        unsigned long hashValue = hashFunc(key);
+        unsigned long hashValue = hashFunc(key) % capacity;
         HashNode<K, V> *prev = NULL;
         HashNode<K, V> *entry = table[hashValue];
 
@@ -85,11 +90,38 @@ public:
                 prev->setNext(entry->getNext());
             }
             delete entry;
+            size--;
         }
     }
 
 private:
     // hash table
     HashNode<K, V> **table;
+    // hash function
     F hashFunc;
+    // capacity
+    int capacity;
+    // size
+    int size;
+
+    void resize() {
+        HashNode<K, V> **oldTable = table;
+        int oldCapacity = capacity;
+        capacity *= 2;
+        table = new HashNode<K, V> *[capacity]();
+
+        for(int i = 0; i < oldCapacity; i++) {
+            table[i] = NULL;
+            HashNode<K, V> *oldEntry = NULL;
+            HashNode<K, V> *entry = oldTable[i];
+            while(entry != NULL) {
+                put(entry->getKey(), entry->getValue());
+                oldEntry = entry;
+                entry = entry->getNext();
+                delete oldEntry;
+            }
+        }
+        delete[] oldTable;
+    }
+
 };
