@@ -4,7 +4,7 @@
 #include <assert.h>
 #include "../src/HashMap.h"
 
-using namespace std;
+//using namespace std;
 
 struct MyKeyHash {
     unsigned long operator()(const int& k) const

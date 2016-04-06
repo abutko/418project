@@ -1,6 +1,6 @@
 #include "HashNode.h"
 #include "KeyHash.h"
-#include "pthread.h"
+//#include "pthread.h"
 
 // Hash map class template
 template <typename K, typename V, typename F = KeyHash<K> >
@@ -9,6 +9,7 @@ public:
     HashMap() {
         // construct zero initialized hash table of size
         table = new HashNode<K, V> *[TABLE_SIZE]();
+        //pthread_rwlock_init(&lock, NULL);
         capacity = TABLE_SIZE;
     }
 
@@ -28,21 +29,27 @@ public:
     }
 
     bool get(const K &key, V &value) {
+        //pthread_rwlock_rdlock(&lock);
         unsigned long hashValue = hashFunc(key) % capacity;
         HashNode<K, V> *entry = table[hashValue];
 
         while (entry != NULL) {
             if (entry->getKey() == key) {
                 value = entry->getValue();
+                //pthread_rwlock_unlock(&lock);
                 return true;
             }
             entry = entry->getNext();
         }
+        //pthread_rwlock_unlock(&lock);
         return false;
     }
 
     void put(const K &key, const V &value) {
-        if((size/capacity) >= 21)
+        //pthread_rwlock_wrlock(&lock);
+        //pthread_rwlock_rdlock(&lock);
+
+        if((size/capacity) >= 21) {
             resize();
 
         unsigned long hashValue = hashFunc(key) % capacity;
@@ -67,9 +74,12 @@ public:
             // just update the value
             entry->setValue(value);
         }
+        //pthread_rwlock_unlock(&lock);
     }
 
     void remove(const K &key) {
+        //pthread_rwlock_wrlock(&lock);
+
         unsigned long hashValue = hashFunc(key) % capacity;
         HashNode<K, V> *prev = NULL;
         HashNode<K, V> *entry = table[hashValue];
@@ -81,6 +91,7 @@ public:
 
         if (entry == NULL) {
             // key not found
+            //pthread_rwlock_unlock(&lock);
             return;
         }
         else {
@@ -93,6 +104,7 @@ public:
             delete entry;
             size--;
         }
+        //pthread_rwlock_unlock(&lock);
     }
 
 private:
@@ -104,7 +116,7 @@ private:
     int capacity;
     // size
     int size;
-    pthread_rwlock_t lock;
+    //pthread_rwlock_t lock;
 
     void resize() {
         HashNode<K, V> **oldTable = table;
