@@ -14,7 +14,7 @@ using namespace std;
 struct MyKeyHash {
     unsigned long operator()(const int& k) const
     {
-        return k % 10;
+        return k*48611;
     }
 };
 
@@ -24,7 +24,7 @@ HashMap<int, string, MyKeyHash> hmap;
 // Only performance testing 75% reads, rest writes
 void *mostlyReads(void *arg) {
     int threadNum = (long) arg;
-    for(int i = threadNum; i < 100000; i+=NUM_THREADS) {
+    for(int i = threadNum; i < 10000000; i+=NUM_THREADS) {
         hmap.put(i, to_string(i));
         string value;
         hmap.get(i, value);
@@ -64,6 +64,6 @@ int main()
 
 	cout << "All tests passed!" << endl;
     double endTime = CycleTimer::currentSeconds();
-    printf("Total Test Time = \t\t[%.3f] ms\n", endTime - startTime);
+    printf("Total Test Time = \t\t[%.3f] s\n", endTime - startTime);
     pthread_exit(NULL);
 }
