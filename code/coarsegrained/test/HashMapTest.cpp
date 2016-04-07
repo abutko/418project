@@ -5,6 +5,8 @@
 #include "../src/HashMap.h"
 #include <pthread.h>
 
+#include "CycleTimer.h"
+
 using namespace std;
 
 #define NUM_THREADS 24
@@ -18,9 +20,24 @@ struct MyKeyHash {
 
 HashMap<int, string, MyKeyHash> hmap;
 
+// PERFORMANCE TESTING
+// Only performance testing 75% reads, rest writes
+void *mostlyReads(void *arg) {
+    int threadNum = (long) arg;
+    for(int i = threadNum; i < 100000; i+=NUM_THREADS) {
+        hmap.put(i, to_string(i));
+        string value;
+        hmap.get(i, value);
+        hmap.get(i+1, value);
+        hmap.get(i+2, value);
+    }
+    return NULL;
+}
+
+// CORRECTNESS TESTING
 void *threadRoutine(void *arg) {
     int threadNum = (long) arg;
-    for(int i = threadNum; i < 10000; i+=NUM_THREADS) {
+    for(int i = threadNum; i < 100000; i+=NUM_THREADS) {
         hmap.put(i, to_string(i));
         string value;
         bool result = hmap.get(i, value);
@@ -32,42 +49,21 @@ void *threadRoutine(void *arg) {
         bool result = hmap.get(i, value);
         assert(!result);
     }
+    return NULL;
 }
 
 int main() 
 {
-	//HashMap<int, string, MyKeyHash> hmap;
-    /*
-    for(int i = 0; i < 10000; i++) {
-        hmap.put(i, "1");//std::to_string(i));
-        string value;
-        hmap.get(i, value);
-        assert(value == "1");//std::to_string(i));
-    }
-
-	hmap.put(1, "1");
-	hmap.put(2, "2");
-	hmap.put(3, "3");
-
-	string value;
-	bool result = hmap.get(2, value);
-	assert(result);
-	assert(value == "2");
-
-	result = hmap.get(3, value);
-	assert(result);
-	assert(value == "3");
-
-	hmap.remove(3);
-	result = hmap.get(3, value);
-	assert(!result);*/
+    double startTime = CycleTimer::currentSeconds();
     pthread_t threads[NUM_THREADS];
     for(int i = 0; i < NUM_THREADS; i++)
-        pthread_create(&threads[i], NULL, threadRoutine, (void *)i);
+        pthread_create(&threads[i], NULL, mostlyReads, (void *)i);
 
     for(int i = 0; i < NUM_THREADS; i++)
         pthread_join(threads[i], NULL);
 
 	cout << "All tests passed!" << endl;
+    double endTime = CycleTimer::currentSeconds();
+    printf("Total Test Time = \t\t[%.3f] ms\n", endTime - startTime);
     pthread_exit(NULL);
 }

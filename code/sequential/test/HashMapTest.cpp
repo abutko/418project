@@ -4,6 +4,8 @@
 #include <assert.h>
 #include "../src/HashMap.h"
 
+#include "CycleTimer.h"
+
 using namespace std;
 
 struct MyKeyHash {
@@ -13,10 +15,27 @@ struct MyKeyHash {
     }
 };
 
+HashMap<int, string, MyKeyHash> hmap;
+
+/* PERFORMANCE TESTING
+ * ----------------------------------------------------------- */
+// Only performance testing 75% reads, rest writes
+void mostlyReads() {
+    for(int i = 0; i < 100000; i++) {
+        hmap.put(i, to_string(i));
+        string value;
+        hmap.get(i, value);
+        hmap.get(i+1, value);
+        hmap.get(i+2, value);
+    }
+}
+
 int main() 
 {
-	HashMap<int, string, MyKeyHash> hmap;
-    for(int i = 0; i < 10000; i++) {
+    double startTime = CycleTimer::currentSeconds();
+	//HashMap<int, string, MyKeyHash> hmap;
+    /*
+    for(int i = 0; i < 100000; i++) {
         hmap.put(i, "1");//std::to_string(i));
         string value;
         hmap.get(i, value);
@@ -39,6 +58,10 @@ int main()
 	hmap.remove(3);
 	result = hmap.get(3, value);
 	assert(!result);
+    */
+    mostlyReads();
 
 	cout << "All tests passed!" << endl;
+    double endTime = CycleTimer::currentSeconds();
+    printf("Total Test Time = \t\t[%.3f] ms\n", endTime - startTime);
 }
