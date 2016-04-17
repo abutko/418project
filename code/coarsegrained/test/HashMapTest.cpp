@@ -56,7 +56,7 @@ int main()
 {
     double startTime = CycleTimer::currentSeconds();
     pthread_t threads[NUM_THREADS];
-    for(int i = 0; i < NUM_THREADS; i++)
+    for(long i = 0; i < NUM_THREADS; i++)
         pthread_create(&threads[i], NULL, mostlyReads, (void *)i);
 
     for(int i = 0; i < NUM_THREADS; i++)
