@@ -37,35 +37,7 @@
 
 <p><strong>TITLE.</strong> Parallel Hash Tables. Brought to you by Manu Garg, Andrew Butko.</p>
 
-<p><strong>SUMMARY.</strong> We are going to implement concurrent hash tables that use coarse grained/fine grained locks. 
-We are also going to implement lock-free hash tables. 
-Finally we're going to analyze the implementations of each of them by testing them on different programs with different data access patterns.</p>
-
-<p><strong>BACKGROUND.</strong> A hash table is a data structure that maps keys to values and allows fast accesses to the data.
-More on hash tables: <a href="https://en.wikipedia.org/wiki/Hash_table">hash tables</a></p>
-
-<p><strong>THE CHALLENGE.</strong>
-The problem is challenging because lock-free data structures are hard. In general implementing a correct version
-of the same and avoiding race conditions will itself be a challenge. 
-Moreover if we implement the hash tables with separate chaining then deletion is going to be an issue.
-Another problem would be resizing the hash table and ensuring that is still lock-free. </p>
-
-<p><strong>RESOURCES.</strong> 
-We will be using C++ for the coding aspects of this assignment and the Gates/Latedays clusters for testing/analyzing the performance of the code.
-We will most likely start the code from scratch but will be using ideas from research papers to supplement the implementation. This 
-<a href="http://www.research.ibm.com/people/m/michael/spaa-2002.pdf">research paper</a> looks promising. </p>
-
-<p><strong>GOALS AND DELIVERABLES.</strong></p>
-
-<ul>
-<li> PLAN TO ACHIEVE: We plan to implement several versions of locking on hash tables (coarse, fine) along with a lock free version based on the paper above. Along with this, we plan to do a performance analysis comparing these implementations and would like to achieve similar results to the listed paper.  A similar project was completed in a previous semester, so this should be achieveable. </li>
-<li> HOPE TO ACHIEVE: If we find time, we'd like to investigate implementing a binary decision diagram interface on top of the parallel hash tables. We also plan to investigate using the RMC system for implementing our system. </li>
-<li> Because the research paper shows a performance analysis for different workloads, we will use a similar set of tests to check our performance. For a demo, we can present our results as a speedup graph and hopefully meet or exceed these results. If we implement a BDD package, we can also show speedup graphs (but we'll have to do more research to find what kind of tests are used). </li>
-</ul>
-
-<p><strong>PLATFORM CHOICE.</strong> We will implement this using C++ (as this was the suggested comparison for RMC) and tentatively do performance testing on the Gates clusters or Latedays. We will figure out which machines best match what was used in the research paper for testing and go with that to have a better measure of our performance. </p>
-
-<p><strong>SCHEDULE.</strong> </p>
+<p><strong>UPDATED SCHEDULE.</strong> </p>
 
 <p>
 <table class="projectSchedule">
@@ -138,45 +110,34 @@ We will most likely start the code from scratch but will be using ideas from res
   <td>
     Final buffer days, complete final report.
   </td>
-  <td>ndrew/Manu</td>
+  <td>Andrew/Manu</td>
   <td></td>
 </tr>
 </table>
 </p>
-<!--
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here <a href="https://guides.github.com/features/mastering-markdown/">using GitHub Flavored Markdown</a>, select a template crafted by a designer, and publish. After your page is generated, you can check out the new <code>gh-pages</code> branch locally. If you’re using GitHub Desktop, simply sync your repository and you’ll see the new branch.</p>
 
-<h3>
-<a id="designer-templates" class="anchor" href="#designer-templates" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Designer Templates</h3>
+<p><strong>WORK COMPLETED.</strong> 
+We have completed the implementation of fine and coarse grain locking schemes 
+(these are available in this repository under the code/ directory). Coarse-grain is implemented with a single pthread reader-writer lock 
+on the table while fine-grain adds mutex locks for each bucket in the hash table. We also designed a testing suite that
+allows us to vary parameters such as workload size, operation distribution, and the range of keys. This is currently done
+pseudo-randomly, and we will explore variations on this in the future. Note - we started with a generic sequential code base
+from https://gist.github.com/aozturk/2368896.
+</p>
+<p><strong>GOALS AND DELIVERABLES.</strong> 
+We will definitely be able to complete all deliverables previously mentioned (lock-free implementation, performance analysis).
+For the competition we would show performance graphs.
+We are on track with our initial goals and don't have anything new to add. We listed BDDs under the "nice to haves"
+and have left room in the schedule to work on this if we complete our primary goals on time. We have not researched this thoroughly
+and are not sure of the amount of work this will involve, but with the remaining time we have we hopefully will manage to
+have some additional features.
+</p>
 
-<p>We’ve crafted some handsome templates for you to use. Go ahead and click 'Continue to layouts' to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved.</p>
-
-<h3>
-<a id="creating-pages-manually" class="anchor" href="#creating-pages-manually" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Creating pages manually</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>
-<a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Authors and Contributors</h3>
-
-<p>You can <a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/#mentioning-users-and-teams" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor’s GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>
-<a id="support-or-contact" class="anchor" href="#support-or-contact" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out our <a href="https://help.github.com/pages">documentation</a> or <a href="https://github.com/contact">contact support</a> and we’ll help you sort it out.</p>
-      </section>
-    </div>
-
-    
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">418project maintained by <a href="https://github.com/abutko">abutko</a></p>
-        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
--->
-    
-
+<p><string>PRELIMINARY RESULTS</string>
+With our testing suite we have seen a performance improvement with the fine-grain locking as expected. We tested this with
+std::mutex and pthread reader-writer locks and found mutex locks had better performance. As we just completed the testing harness,
+we still need to compile an intial performance report (speedup graphs). This is the first goal listed on the updated 
+schedule above.
+</p>
   </body>
 </html>
