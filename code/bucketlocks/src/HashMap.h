@@ -60,10 +60,12 @@ public:
          * Because global read lock is acquired before bucket lock, no other
          * thread can access table internals
          */ 
-        pthread_rwlock_wrlock(&tableLock);
-        if((size/capacity) >= 5)
-            resize();
-        pthread_rwlock_unlock(&tableLock);
+        if((size/capacity) >= 5) {
+            pthread_rwlock_wrlock(&tableLock);
+            if ((size/capacity) >= 5)
+                resize();
+            pthread_rwlock_unlock(&tableLock);
+        }
         pthread_rwlock_rdlock(&tableLock);
 
         unsigned long hashValue = hashFunc(key) % capacity;
