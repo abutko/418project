@@ -42,13 +42,13 @@ void *threadRoutine(void *arg) {
         string value;
         bool result = hmap.get(i, value);
         assert(value == to_string(i));
-    }
+    }/*
     for(int i = threadNum; i < 10000; i+=NUM_THREADS) {
         hmap.remove(i);
         string value;
         bool result = hmap.get(i, value);
         assert(!result);
-    }
+    }*/
     return NULL;
 }
 
@@ -57,7 +57,7 @@ int main()
     double startTime = CycleTimer::currentSeconds();
     pthread_t threads[NUM_THREADS];
     for(long i = 0; i < NUM_THREADS; i++)
-        pthread_create(&threads[i], NULL, mostlyReads, (void *)i);
+        pthread_create(&threads[i], NULL, threadRoutine, (void *)i);
 
     for(int i = 0; i < NUM_THREADS; i++)
         pthread_join(threads[i], NULL);

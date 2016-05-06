@@ -105,10 +105,14 @@ void *threadRoutine(void *arg) {
         bool result = hmap.get(i, value);
         assert(value == to_string(i));
     }
-    for(int i = threadNum; i < 10000; i+=NUM_THREADS) {
+    for(int i = threadNum; i < 1/*00000*/; i+=NUM_THREADS) {
+        printf("Thread %d: Before Remove\n", i);
         hmap.remove(i);
+        printf("Thread %d: After remove\n", i);
         string value;
+        printf("Thread %d: Before get\n", i);
         bool result = hmap.get(i, value);
+        printf("Thread %d: After get\n", i);
         assert(!result);
     }
     return NULL;
@@ -176,7 +180,8 @@ int main(int argc, char **argv)
     double startTime = CycleTimer::currentSeconds();
     pthread_t threads[NUM_THREADS];
     for(long i = 0; i < NUM_THREADS; i++)
-        pthread_create(&threads[i], NULL, threadPerf, (void *)i);
+        pthread_create(&threads[i], NULL, threadRoutine, (void *)i);
+        //pthread_create(&threads[i], NULL, threadPerf, (void *)i);
 
     for(int i = 0; i < NUM_THREADS; i++)
         pthread_join(threads[i], NULL);
