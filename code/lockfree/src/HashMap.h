@@ -1,4 +1,3 @@
-#include "HashNode.h"
 #include "KeyHash.h"
 #include <pthread.h>
 #include <mutex>
@@ -24,16 +23,16 @@ public:
 template <typename K, typename V>
 class List {
 private:
-    bool is_marked(Node<K,V> *&node) {
+    bool is_marked(Node<K,V> *node) {
         return ((unsigned long)(char *)node) & 1;
     }
 
-    Node<K,V> *get_unmarked(Node<K,V> *&node) {
+    Node<K,V> *get_unmarked(Node<K,V> *node) {
         return (Node<K, V> *)((((unsigned long)(char *)node)>>1)<<1);
     }
 
-    Node<K,V> *get_marked(Node<K,V> *&node) {
-        return (Node<K, V> *)(((unsigned long)(char *)node) || 1);
+    Node<K,V> *get_marked(Node<K,V> *node) {
+        return (Node<K, V> *)(((unsigned long)(char *)node) | 1);
     }
 
 public:
@@ -47,7 +46,8 @@ public:
     }
 
     void search(const K &key, Node<K,V> *&left_node, Node<K,V> *&right_node) {
-        Node<K,V> *left_node_next = NULL;
+        left_node = head;
+        Node<K,V> *left_node_next =head->next;
 search_again:
         while(true) {
             Node<K,V> *t = head;
@@ -72,7 +72,6 @@ search_again:
                 else
                     return;
             }
-
             // 3. Remove one or more marked node
             if(__sync_bool_compare_and_swap(&(left_node->next), left_node_next, right_node)) {
                 if ((right_node != tail) && is_marked(right_node->next))
@@ -101,8 +100,11 @@ search_again:
         Node<K, V> *right_node = NULL;
         while(true) {
             search(key, left_node, right_node);
+            //while(is_marked(left_node->next) || is_marked(right_node->next))
+            //    search(key, left_node, right_node);
             if((right_node != tail) && (right_node->key == key)) {
-                right_node->value = value; //UNSURE ABOUT THIS
+                right_node->value = value;
+                delete new_node;
                 return;
             }
             new_node->next = right_node;
@@ -120,14 +122,21 @@ search_again:
             if((right_node == tail) || (right_node->key != key))
                 return;
             right_node_next = right_node->next;
+
             if(!is_marked(right_node_next)) {
                 if(__sync_bool_compare_and_swap(&(right_node->next),
                                                 right_node->next, get_marked(right_node->next)))
                     break;
             }
-        }
+            if(!__sync_bool_compare_and_swap(&(left_node->next), right_node, right_node->next))
+                search(right_node->key, left_node, right_node);
+            else
+                break;
+           
+        }/*
         if(!__sync_bool_compare_and_swap(&(left_node->next), right_node, right_node->next))
             search(right_node->key, left_node, right_node);
+            */
     }
 };
 
