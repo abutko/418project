@@ -107,17 +107,14 @@ void *threadRoutine(void *arg) {
         assert(value == to_string(i));
         //hmap.remove(i);
     }
-    /*
+    
     for(int i = threadNum; i < 100000; i+=NUM_THREADS) {
-        //printf("Thread %d: Before Remove\n", i);
         hmap.remove(i);
-        //printf("Thread %d: After remove\n", i);
         string value;
-        //printf("Thread %d: Before get\n", i);
         bool result = hmap.get(i, value);
-        //printf("Thread %d: After get\n", i);
         assert(!result);
-    }*/
+    }
+
     return NULL;
 }
 

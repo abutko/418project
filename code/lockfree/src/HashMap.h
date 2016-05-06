@@ -46,10 +46,11 @@ public:
     }
 
     void search(const K &key, Node<K,V> *&left_node, Node<K,V> *&right_node) {
-        left_node = head;
-        Node<K,V> *left_node_next =head->next;
 search_again:
         while(true) {
+            left_node = head;
+            Node<K,V> *left_node_next = head->next;
+
             Node<K,V> *t = head;
             Node<K,V> *t_next = head->next;
 
@@ -72,6 +73,7 @@ search_again:
                 else
                     return;
             }
+
             // 3. Remove one or more marked node
             if(__sync_bool_compare_and_swap(&(left_node->next), left_node_next, right_node)) {
                 if ((right_node != tail) && is_marked(right_node->next))
@@ -100,8 +102,7 @@ search_again:
         Node<K, V> *right_node = NULL;
         while(true) {
             search(key, left_node, right_node);
-            //while(is_marked(left_node->next) || is_marked(right_node->next))
-            //    search(key, left_node, right_node);
+
             if((right_node != tail) && (right_node->key == key)) {
                 right_node->value = value;
                 delete new_node;
@@ -125,18 +126,12 @@ search_again:
 
             if(!is_marked(right_node_next)) {
                 if(__sync_bool_compare_and_swap(&(right_node->next),
-                                                right_node->next, get_marked(right_node->next)))
+                                                right_node_next, get_marked(right_node_next)))
                     break;
             }
-            if(!__sync_bool_compare_and_swap(&(left_node->next), right_node, right_node->next))
-                search(right_node->key, left_node, right_node);
-            else
-                break;
-           
-        }/*
-        if(!__sync_bool_compare_and_swap(&(left_node->next), right_node, right_node->next))
+        }
+        if(!__sync_bool_compare_and_swap(&(left_node->next), right_node, right_node_next))
             search(right_node->key, left_node, right_node);
-            */
     }
 };
 
@@ -150,7 +145,7 @@ public:
         capacity = TABLE_SIZE;
     }
 
-    ~HashMap() {/*
+    ~HashMap() {
         // destroy all buckets one by one
         for (int i = 0; i < capacity; i++) {
             Node<K, V> *entry = table[i].head;
@@ -162,7 +157,7 @@ public:
         }
 
         // destroy the hash table
-        delete [] table;*/
+        delete [] table;
     }
 
     bool get(const K &key, V &value) {
