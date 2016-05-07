@@ -77,7 +77,29 @@ destroyed any potential gain obtained from parallelization a single bucket level
 
 <p>Lock-free: </p>
 
-<p>1. insert </p>
+<p>Each operation uses a common function called search. This function takes in a search key and return references to two nodes left node,
+right node for that key (left node's key < search key < right node's key) and both nodes are unmarked which means that they haven't been
+deleted from the table (checked through a mark bit in each node's next pointer). Finally the right node must be the immediate successor
+of the left node. This function is divided into three phases. The first phase iterates across the corresponding bucket to find the first 
+unmarked node whose key >= search key. This is our right node. The first phase also finds the last unmarked left node. The second phase 
+checks if the right node is the immediate successor of the left node, if that is the case and the right node isn't marked then
+we return else we call search again. The last phase uses an atomic CAS operation to remove all the unmarked nodes between left node and right node.</p>
+
+<p>put: After finding the corresponding bucket where the key should be stored, we call search on the bucket to get the left node and 
+the right node in between which the key should be inserted. If the key is already stored in the bucket (i.e. in the right node) then 
+we do an atomic exchange of the old value with the new value. Otherwise we do a single atomic CAS operation to insert a new node with 
+the input key, value pair in between the left node and the right node</p>
+
+<p>remove: After finding the corresponding bucket where the key should be removed from, we call search on the bucket to locate the node 
+to delete and then use a two-phase process to perform the deletion. First, the node is logically deleted by marking the reference 
+in the node's next field. Next, the node is physically deleted by attempting a single atomic CAS operation to swing left node's next
+to right node's next, if this doesn't work then the deletion takes places within an invocation of search (It's 3rd phase does the trick) </p>
+
+<p>get: After finding the corresponding bucket where the key should be located, we call search on the bucket to get the node where 
+the key might be present.</p>
+
+<p>For a more detailed explanation of the above mentioned operations refer to the code on github or the 
+<a href="https://timharris.uk/papers/2001-disc.pdf">research paper</a> on which this implementation is based on.</p>
 
 <p>
 <table class="projectSchedule">
