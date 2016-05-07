@@ -53,12 +53,31 @@ i.e. a linked list per bucket (Fig.1)
 <figure>
   <img src="hashtable.png" alt="hash table">
   <figcaption> Fig.1 - Hashtable with separate chaining</figcaption>
-</figure>
+</figure><br>
 
 Although none of the individual operations are computationaly expensive (roughly O(1) average access time per op for a good hash table 
 implementation), they are highly parallelizable, especially when contention isn't high because at that point the different operations
-are accessing different buckets.
+are accessing different buckets and you can perform them in parallel without any dependencies.
 </p>
+
+<p><strong>APPROACH.</strong></p>
+
+<p>Coarse-grained: In this implementation we used a global pthread read-write lock for the table. On insert/delete we acquire a
+write lock on the table and then we insert/remove the key, value pair in the corresponding hashed bucket 
+whereas in search we acquired a read lock on the table and then we try to find the entry in the corresponding hashed bucket. 
+This allows multiple readers to read the table but only one writer
+for the table. On resize which happens in insert when the load factor hits a certain threshold we acquire a write lock on the table and
+then create a new bucket array and copy over the contents of the original table, rehashing them to their new locations. This approach 
+could potentially lead to starvation since it provides no fairness guarantees </p>
+
+<p>Fine-grained: In this implementation we used an array of pthread read-write locks, one per bucket of the table. Although this
+approach allows parallelization at bucket level as well, we found it to be slower than using mutex locks, one per bucket of the table. 
+This is because we expect O(1) access time at the bucket level and the overhead in the acquisiting of a pthread read-write lock 
+destroyed any potential gain obtained from parallelization a single bucket level. This approach could also lead to starvation.</p>
+
+<p>Lock-free: </p>
+
+<p>1. insert </p>
 
 <p>
 <table class="projectSchedule">
