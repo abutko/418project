@@ -21,7 +21,7 @@ float SEARCH = 0.34;
 struct MyKeyHash {
     unsigned long operator()(const int& k) const
     {
-        return k*48611;
+        return 0;//k*48611;
     }
 };
 
@@ -58,6 +58,7 @@ int list_remove(struct list *L) {
 }
 
 HashMap<int, string, MyKeyHash> hmap;
+HashMap<int, int, MyKeyHash> intmap;
 
 // PERFORMANCE TESTING
 void *threadPerf(void *arg) {
@@ -95,11 +96,31 @@ void *threadPerf(void *arg) {
     return NULL;
 }
 
+// PERFORMANCE TESTING
+void *linkedlistPerfRoutine(void *arg) {
+    RANGE = 256;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, RANGE - 1);
+
+    for(int i = 0; i < 10000; i++) {
+        int key = dis(gen);
+        int val = 0; // Doesn't matter
+        int operation = rand() % 2;
+        if(operation == 0)
+            intmap.put(key, 0);
+        else if(operation == 1)
+            intmap.remove(key);
+    }
+
+    return NULL;
+}
+
 // CORRECTNESS TESTING
 void *threadRoutine(void *arg) {
     int threadNum = (long) arg;
 
-    for(int i = threadNum; i < 100000; i+=NUM_THREADS) {
+    for(int i = threadNum; i < 10000; i+=NUM_THREADS) {
         hmap.put(i, to_string(i));
         string value;
         bool result = hmap.get(i, value);
@@ -108,7 +129,7 @@ void *threadRoutine(void *arg) {
         //hmap.remove(i);
     }
     
-    for(int i = threadNum; i < 100000; i+=NUM_THREADS) {
+    for(int i = threadNum; i < 10000; i+=NUM_THREADS) {
         hmap.remove(i);
         string value;
         bool result = hmap.get(i, value);
@@ -180,8 +201,10 @@ int main(int argc, char **argv)
     double startTime = CycleTimer::currentSeconds();
     pthread_t threads[NUM_THREADS];
     for(long i = 0; i < NUM_THREADS; i++)
-        pthread_create(&threads[i], NULL, threadRoutine, (void *)i);
+        pthread_create(&threads[i], NULL, linkedlistPerfRoutine, (void *)i);
+        //pthread_create(&threads[i], NULL, threadRoutine, (void *)i);
         //pthread_create(&threads[i], NULL, threadPerf, (void *)i);
+        //pthread_create(&threads[i], NULL, linkedlistPerfRoutine, (void *)i);
 
     for(int i = 0; i < NUM_THREADS; i++)
         pthread_join(threads[i], NULL);

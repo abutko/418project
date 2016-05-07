@@ -1,6 +1,7 @@
 #include "KeyHash.h"
 #include <pthread.h>
 #include <mutex>
+//#include <atomic>
 
 // Hash node per bucket
 template <typename K, typename V>
@@ -104,10 +105,11 @@ search_again:
             search(key, left_node, right_node);
 
             if((right_node != tail) && (right_node->key == key)) {
-                right_node->value = value;
+                __atomic_exchange(&(right_node->value), &(right_node->value), &value, __ATOMIC_RELAXED);
                 delete new_node;
                 return;
             }
+
             new_node->next = right_node;
             if(__sync_bool_compare_and_swap(&(left_node->next),
                                             right_node, new_node))
@@ -147,6 +149,7 @@ public:
 
     ~HashMap() {
         // destroy all buckets one by one
+        
         for (int i = 0; i < capacity; i++) {
             Node<K, V> *entry = table[i].head;
             while (entry != NULL) {
@@ -155,9 +158,8 @@ public:
                 delete prev;
             }
         }
-
         // destroy the hash table
-        delete [] table;
+        delete table;
     }
 
     bool get(const K &key, V &value) {
