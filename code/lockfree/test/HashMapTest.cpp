@@ -11,6 +11,10 @@
 using namespace std;
 
 #define NUM_THREADS 24
+// Uncomment the following for correctness testing
+//#define DEBUG
+// Uncomment the following for better (but slower) correctness testing for lock-free
+//#define CONTENTION
 
 int   OPS    = 1000000;
 int   RANGE  = 1000;
@@ -21,7 +25,10 @@ float SEARCH = 0.34;
 struct MyKeyHash {
     unsigned long operator()(const int& k) const
     {
-        return 0;//k*48611;
+#ifdef CONTENTION
+        return 0;
+#endif
+        return k*48611;
     }
 };
 
@@ -57,11 +64,12 @@ int list_remove(struct list *L) {
     return x;
 }
 
-HashMap<int, string, MyKeyHash> hmap;
-HashMap<int, int, MyKeyHash> intmap;
+// The hashtable declaration
+HashMap<int, int, MyKeyHash> hmap;
 
-// PERFORMANCE TESTING
-void *threadPerf(void *arg) {
+// PER-THREAD PERFORMANCE TESTING
+/*******************************************************************************/
+void *performance(void *arg) {
     int threadNum = (long) arg;
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -71,13 +79,14 @@ void *threadPerf(void *arg) {
 
     for(int i = 0; i < OPS; i++) {
         // choose element uniformly over specified range
-        int val = dis(gen);
+        int key = dis(gen);
+        int val = 0;
         // use to choose operation based on given probabilities 
         float p = (float)rand()/(float)(RAND_MAX);
         if (p < INSERT) { 
             // choose insert
-            hmap.put(val, to_string(val));  
-            list_insert(L, val); 
+            hmap.put(key, val);  
+            list_insert(L, key); 
         }
         else if (p < INSERT + DELETE) { 
             // choose delete, only on elements this thread inserted
@@ -89,55 +98,44 @@ void *threadPerf(void *arg) {
         }
         else { 
             // choose search 
-            string value;
-            hmap.get(val, value);   
+            int value;
+            hmap.get(key, value);   
         }
     }
     return NULL;
 }
+/*******************************************************************************/
 
-// PERFORMANCE TESTING
-void *linkedlistPerfRoutine(void *arg) {
-    RANGE = 256;
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, RANGE - 1);
-
-    for(int i = 0; i < 10000; i++) {
-        int key = dis(gen);
-        int val = 0; // Doesn't matter
-        int operation = rand() % 2;
-        if(operation == 0)
-            intmap.put(key, 0);
-        else if(operation == 1)
-            intmap.remove(key);
-    }
-
-    return NULL;
-}
-
-// CORRECTNESS TESTING
-void *threadRoutine(void *arg) {
+// PER-THREAD CORRECTNESS TESTING
+/*******************************************************************************/
+void *correctness(void *arg) {
+    // If you want correctness testing on higher contention then
+    // just uncomment the CONTENTION flag on the top of the file, this
+    // just makes the hashtable essentially become a linked list
+    // (only suitable for lock-free ofc)
     int threadNum = (long) arg;
 
-    for(int i = threadNum; i < 10000; i+=NUM_THREADS) {
-        hmap.put(i, to_string(i));
-        string value;
-        bool result = hmap.get(i, value);
+    for(int i = threadNum; i < 100000; i+=NUM_THREADS) {
+        int key = i;
+        int val = 0;
+        hmap.put(key, val);
+        int value;
+        bool result = hmap.get(key, value);
         assert(result);
-        assert(value == to_string(i));
-        //hmap.remove(i);
+        assert(value == 0);
     }
     
-    for(int i = threadNum; i < 10000; i+=NUM_THREADS) {
-        hmap.remove(i);
-        string value;
-        bool result = hmap.get(i, value);
+    for(int i = threadNum; i < 100000; i+=NUM_THREADS) {
+        int key = i;
+        int value;
+        hmap.remove(key);
+        bool result = hmap.get(key, value);
         assert(!result);
     }
 
     return NULL;
 }
+/*******************************************************************************/
 
 int main(int argc, char **argv) 
 {
@@ -200,11 +198,14 @@ int main(int argc, char **argv)
 
     double startTime = CycleTimer::currentSeconds();
     pthread_t threads[NUM_THREADS];
-    for(long i = 0; i < NUM_THREADS; i++)
-        pthread_create(&threads[i], NULL, linkedlistPerfRoutine, (void *)i);
-        //pthread_create(&threads[i], NULL, threadRoutine, (void *)i);
-        //pthread_create(&threads[i], NULL, threadPerf, (void *)i);
-        //pthread_create(&threads[i], NULL, linkedlistPerfRoutine, (void *)i);
+    for(long i = 0; i < NUM_THREADS; i++) {
+#ifdef DEBUG
+        pthread_create(&threads[i], NULL, correctness, (void *)i);
+#endif
+#ifndef DEBUG
+        pthread_create(&threads[i], NULL, performance, (void *)i);
+#endif
+    }
 
     for(int i = 0; i < NUM_THREADS; i++)
         pthread_join(threads[i], NULL);
