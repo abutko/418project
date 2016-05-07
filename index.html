@@ -62,6 +62,10 @@ are accessing different buckets and you can perform them in parallel without any
 
 <p><strong>APPROACH.</strong></p>
 
+<p>We used c++ for writing the code and GHC machines for testing. The operations in each of the following implementations can be 
+called in parallel by separate threads. We started with a basic working <a href=https://gist.github.com/aozturk/2368896>sequential version</a> 
+and built upon that further to make different parallelized versions of the same.</p>
+
 <p>Coarse-grained: In this implementation we used a global pthread read-write lock for the table. On insert/delete we acquire a
 write lock on the table and then we insert/remove the key, value pair in the corresponding hashed bucket 
 whereas in search we acquired a read lock on the table and then we try to find the entry in the corresponding hashed bucket. 
@@ -98,103 +102,15 @@ to right node's next, if this doesn't work then the deletion takes places within
 <p>get: After finding the corresponding bucket where the key should be located, we call search on the bucket to get the node where 
 the key might be present.</p>
 
+<p></p>Lock-free Limitations: Although the remove operation removes the key from the hashtable, it doesn't delete the node. This won't 
+be an issue if C++ had a garbage collector, but without one the code above leaks memory. A fix to that would be to use hazard 
+pointers which we tried to implement and use but weren't successful in doing so given our situation and the lack of time. Another 
+limitation of lock-free is that we don't resize, this won't be an issue if we expect the number of removes to be of the order of the 
+number of inserts.</p>
+
 <p>For a more detailed version of the above mentioned operations refer to the 
 <a href=https://github.com/abutko/418project/tree/gh-pages/code>code</a> on github or the 
-<a href="https://timharris.uk/papers/2001-disc.pdf">research paper</a> which this implementation is based on.</p>
-
-<p>
-<table class="projectSchedule">
-<tr>
-  <td width="110"><span style="font-weight: bold;">Week</span></td>
-  <td width="380"><span style="font-weight: bold;">Goals</span></td>
-  <td width="380"><span style="font-weight: bold;">Assigned To</span></td>
-  <td width="380"><span style="font-weight: bold;">Completed?</span></td>
-
-</tr>
-<tr>
-  <td>April 3-9</td>
-  <td>Read listed papers and research RMC model. Plan interface and testing suite. </td>
-  <td>Andrew/Manu</td>
-  <td>Yes</td>
-</tr>
-
-<tr>
-  <td>April 10-16</td>
-  <td>
-    Implement fine and coarse locking schemes.
-  </td>
-  <td>Andrew/Manu</td>
-  <td>Yes</td>
-</tr>
-
-<tr>
-  <td>April 17-20</td>
-  <td>
-    Test various parameters on completed implementations, start to compile testing results.
-  </td>
-  <td>Manu</td>
-  <td></td>
-</tr>
-<tr>
-  <td>April 20-23</td>
-  <td>
-    Re-read paper on lock-free version and start to code.
-  </td>
-  <td>Andrew</td>
-  <td></td>
-</tr>
-<tr>
-  <td>April 24-27</td>
-  <td>
-    Finish coding lock-free implementation and performance analysis.
-  </td>
-  <td>Andrew/Manu</td>
-  <td></td>
-</tr>
-  <td>April 27-30</td>
-  <td>
-    Buffer days.
-  </td>
-  <td>Andrew/Manu</td>
-  <td></td>
-</tr>
-
-<tr>
-  <td>May 1-4</td>
-  <td>
-    BDD if we are ahead. Begin to compile final report.
-  </td>
-  <td>Andrew/Manu</td>
-  <td></td>
-</tr>
-
-<tr>
-  <td>May 5-8</td>
-  <td>
-    Final buffer days, complete final report.
-  </td>
-  <td>Andrew/Manu</td>
-  <td></td>
-</tr>
-</table>
-</p>
-
-<p><strong>WORK COMPLETED.</strong> 
-We have completed the implementation of fine and coarse grain locking schemes 
-(these are available in this repository under the code/ directory). Coarse-grain is implemented with a single pthread reader-writer lock 
-on the table while fine-grain adds mutex locks for each bucket in the hash table. We also designed a testing suite that
-allows us to vary parameters such as workload size, operation distribution, and the range of keys. This is currently done
-pseudo-randomly, and we will explore variations on this in the future. Note - we started with a generic sequential code base
-from https://gist.github.com/aozturk/2368896.
-</p>
-<p><strong>GOALS AND DELIVERABLES.</strong> 
-We will definitely be able to complete all deliverables previously mentioned (lock-free implementation, performance analysis).
-For the competition we would show performance graphs.
-We are on track with our initial goals and don't have anything new to add. We listed BDDs under the "nice to haves"
-and have left room in the schedule to work on this if we complete our primary goals on time. We have not researched this thoroughly
-and are not sure of the amount of work this will involve, but with the remaining time we have we hopefully will manage to
-have some additional features.
-</p>
+<a href="https://timharris.uk/papers/2001-disc.pdf">research paper</a> which the lock-free implementation is based on.</p>
 
 <p><strong>PRELIMINARY RESULTS</strong>
 With our testing suite we have seen a performance improvement with the fine-grain locking as expected. We tested this with
