@@ -46,12 +46,18 @@ a lock-free version of hash tables. Given the speedup of our implementations we 
 which in turn is faster than coarse-grained in most scenarios.</p>
 
 <p><strong>BACKGROUND.</strong> A hashtable is a datastructure that maps keys to values and allows fast accesses to the data.  
-More on hash tables: <a href="https://en.wikipedia.org/wiki/Hash_table">hash tables. The operations on a hashtable include 
+More on hash tables: <a href="https://en.wikipedia.org/wiki/Hash_table">hash tables</a>. The operations on a hashtable include 
 searching a key, inserting a key, value pair and deleting a key from the table. We implemented the hashtable with separate chaining 
-i.e. a linked list per bucket summarized in the figure below:
+i.e. a linked list per bucket (Fig.1)
 
-<img src="hashtable.png" alt="hash table">
+<figure>
+  <img src="hashtable.png" alt="hash table">
+  <figcaption> Fig.1 - Hashtable with separate chaining</figcaption>
+</figure>
 
+Although none of the individual operations are computationaly expensive (roughly O(1) average access time per op for a good hash table 
+implementation), they are highly parallelizable, especially when contention isn't high because at that point the different operations
+are accessing different buckets.
 </p>
 
 <p>
