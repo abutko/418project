@@ -35,13 +35,24 @@
         <h3>
 <a id="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Parallel Hash Tables - Final Report</h3>
 
-<p><strong>TITLE.</strong> Parallel Hash Tables. Brought to you by Manu Garg, Andrew Butko.</p>
-
-<a href = "proposal.html">Proposal </a>
+<a href = "proposal.html">Proposal </a><br>
 
 <a href = "checkpoint.html">Checkpoint Report </a>
 
-<p><strong>UPDATED SCHEDULE.</strong> </p>
+<p><strong>TITLE.</strong> Parallel Hash Tables. Brought to you by Manu Garg, Andrew Butko.</p>
+
+<p><strong>SUMMARY.</strong> We implemented concurrent hash tables that use coarse grained/fine grained locks. We also implemented
+a lock-free version of hash tables. Given the speedup of our implementations we demonstrate that lock-free is faster than fine-grained
+which in turn is faster than coarse-grained in most scenarios.</p>
+
+<p><strong>BACKGROUND.</strong> A hashtable is a datastructure that maps keys to values and allows fast accesses to the data.  
+More on hash tables: <a href="https://en.wikipedia.org/wiki/Hash_table">hash tables. The operations on a hashtable include 
+searching a key, inserting a key, value pair and deleting a key from the table. We implemented the hashtable with separate chaining 
+i.e. a linked list per bucket summarized in the figure below:
+
+<img src="hashtable.png" alt="hash table">
+
+</p>
 
 <p>
 <table class="projectSchedule">
