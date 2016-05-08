@@ -36,11 +36,15 @@
 
 <p>By Manu Garg, Andrew Butko</p>
 
-<p><strong>SUMMARY.</strong> We implemented concurrent hash tables that use coarse grained/fine grained locks. We also implemented
+<p><strong>SUMMARY.</strong></p>
+
+<p>We implemented concurrent hash tables that use coarse grained/fine grained locks. We also implemented
 a lock-free version of hash tables. Given the speedup of our implementations we demonstrate that lock-free is faster than fine-grained
 which in turn is faster than coarse-grained in most scenarios.</p>
 
-<p><strong>BACKGROUND.</strong> A hashtable is a datastructure that maps keys to values and allows fast accesses to the data.  
+<p><strong>BACKGROUND.</strong></p> 
+
+<p>A hashtable is a datastructure that maps keys to values and allows fast accesses to the data.  
 More on hash tables: <a href="https://en.wikipedia.org/wiki/Hash_table">hash tables</a>. The operations on a hashtable include 
 searching a key, inserting a key, value pair and deleting a key from the table. We implemented the hashtable with separate chaining 
 i.e. a linked list per bucket (Fig.1)
@@ -61,7 +65,7 @@ are accessing different buckets and you can perform them in parallel without any
 called in parallel by separate threads. We started with a basic working <a href=https://gist.github.com/aozturk/2368896>sequential version</a> 
 and built upon that further to make different parallelized versions of the same.</p>
 
-<p>Coarse-grained: In this implementation we used a global pthread read-write lock for the table. On insert/delete we acquire a
+<p><b>Coarse-grained:</b> In this implementation we used a global pthread read-write lock for the table. On insert/delete we acquire a
 write lock on the table and then we insert/remove the key, value pair in the corresponding hashed bucket 
 whereas in search we acquired a read lock on the table and then we try to find the entry in the corresponding hashed bucket. 
 This allows multiple readers to read the table but only one writer
@@ -69,12 +73,12 @@ for the table. On resize which happens in insert when the load factor hits a cer
 then create a new bucket array and copy over the contents of the original table, rehashing them to their new locations. This approach 
 could potentially lead to starvation since it provides no fairness guarantees </p>
 
-<p>Fine-grained: In this implementation we used an array of pthread read-write locks, one per bucket of the table. Although this
+<p><b>Fine-grained:</b> In this implementation we used an array of pthread read-write locks, one per bucket of the table. Although this
 approach allows parallelization at bucket level as well, we found it to be slower than using mutex locks, one per bucket of the table. 
 This is because we expect O(1) access time at the bucket level and the overhead in the acquisiting of a pthread read-write lock 
 destroyed any potential gain obtained from parallelization a single bucket level. This approach could also lead to starvation.</p>
 
-<p>Lock-free: </p>
+<p><b>Lock-free:</b></p>
 
 <p>Each operation uses a common function called search. This function takes in a search key and return references to two nodes left node,
 right node for that key (left node's key < search key < right node's key) and both nodes are unmarked which means that they haven't been
@@ -84,20 +88,20 @@ unmarked node whose key >= search key. This is our right node. The first phase a
 checks if the right node is the immediate successor of the left node, if that is the case and the right node isn't marked then
 we return else we call search again. The last phase uses an atomic CAS operation to remove all the unmarked nodes between left node and right node.</p>
 
-<p>put: After finding the corresponding bucket where the key should be stored, we call search on the bucket to get the left node and 
+<p><b>put:</b> After finding the corresponding bucket where the key should be stored, we call search on the bucket to get the left node and 
 the right node in between which the key should be inserted. If the key is already stored in the bucket (i.e. in the right node) then 
 we do an atomic exchange of the old value with the new value. Otherwise we do a single atomic CAS operation to insert a new node with 
 the input key, value pair in between the left node and the right node</p>
 
-<p>remove: After finding the corresponding bucket where the key should be removed from, we call search on the bucket to locate the node 
+<p><b>remove:</b> After finding the corresponding bucket where the key should be removed from, we call search on the bucket to locate the node 
 to delete and then use a two-phase process to perform the deletion. First, the node is logically deleted by marking the reference 
 in the node's next field. Next, the node is physically deleted by attempting a single atomic CAS operation to swing left node's next
 to right node's next, if this doesn't work then the deletion takes places within an invocation of search (It's 3rd phase does the trick) </p>
 
-<p>get: After finding the corresponding bucket where the key should be located, we call search on the bucket to get the node where 
+<p><b>get:</b> After finding the corresponding bucket where the key should be located, we call search on the bucket to get the node where 
 the key might be present.</p>
 
-<p></p>Lock-free Limitations: Although the remove operation removes the key from the hashtable, it doesn't delete the node. This won't 
+<p><b>Lock-free Limitations:</b> Although the remove operation removes the key from the hashtable, it doesn't delete the node. This won't 
 be an issue if C++ had a garbage collector, but without one the code above leaks memory. A fix to that would be to use hazard 
 pointers which we tried to implement and use but weren't successful in doing so given our situation and the lack of time. Another 
 limitation of lock-free is that we don't resize, this won't be an issue if we expect the number of removes to be of the order of the 
