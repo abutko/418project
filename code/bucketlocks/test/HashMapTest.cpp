@@ -10,14 +10,16 @@
 
 using namespace std;
 
-#define NUM_THREADS 24
 // Uncomment the following for correctness testing
 //#define DEBUG
 // Uncomment the following for better (but slower) correctness testing for lock-free
 //#define CONTENTION
 
+int   NUM_THREADS = 24;
 int   OPS    = 1000000;
-int   RANGE  = 1000;
+int   LOAD   = 1000;
+int   BUCKETS = 100; 
+int   RANGE = 2 * LOAD * TABLE_SIZE;
 float INSERT = 0.33;
 float DELETE = 0.33;
 float SEARCH = 0.34;
@@ -152,12 +154,12 @@ int main(int argc, char **argv)
         }
         else if (strcmp(argv[i], "-ops") == 0) {
             // number of operations per thread
-            int top = atoi(argv[i+1]);
-            if (top == 0) {
+            int op = atoi(argv[i+1]);
+            if (op == 0) {
                 printf("Invalid range specified\n");
                 return 1;
             }
-            RANGE = top;
+            OPS = op;
         }
         else if (strcmp(argv[i], "-put") == 0) {
             // relative proportion of inserts
@@ -186,7 +188,26 @@ int main(int argc, char **argv)
             }
             DELETE = rem;
         }
-    
+        else if (strcmp(argv[i], "-load") == 0) {
+            // average load factor
+            int ld = atoi(argv[i+1]);
+            if (ld == 0) {
+                printf("Invalid load factor specified\n");
+                return 1;
+            } 
+            LOAD = ld;
+            RANGE = 2 * LOAD * TABLE_SIZE;
+        }
+        else if (strcmp(argv[i], "-threads") == 0) {
+            // number of threads to use
+            int thread = atoi(argv[i+1]);
+            if (thread == 0) {
+                printf("Invalid load factor specified\n");
+                return 1;
+            }
+            NUM_THREADS = thread;
+        } 
+
     }
     printf("put: %f get: %f rem %f\n", INSERT, SEARCH, DELETE); 
     // need (put+get+rem) ~= 1, these are the relative ratios (probabilities) 
@@ -195,6 +216,10 @@ int main(int argc, char **argv)
         printf("Invalid put, get, remove ratios\n");
         return 1;
     }
+    // Prepopulate hash table based on assigned load factor 
+    for (int i = 0; i < LOAD * TABLE_SIZE; i++) {
+        hmap.put(i, 0);
+    } 
 
     double startTime = CycleTimer::currentSeconds();
     pthread_t threads[NUM_THREADS];
