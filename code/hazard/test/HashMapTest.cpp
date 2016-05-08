@@ -4,22 +4,23 @@
 #include <cmath>
 #include <assert.h>
 #include "../src/HashMap.h"
+#include "../src/Hazard.h"
 #include <pthread.h>
 #include <random>
 #include "CycleTimer.h"
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
-// Uncomment the following for correctness testing
-//#define DEBUG
-// Uncomment the following for better (but slower) correctness testing for lock-free
-//#define CONTENTION
+HPNode *HPNode::head = NULL;
 
-int   NUM_THREADS = 24;
+
+#define NUM_THREADS 24
+#define RLIST_MAX_SIZE 10
+
 int   OPS    = 1000000;
-int   LOAD   = 1000;
-int   BUCKETS = 100; 
-int   RANGE = 2 * LOAD * TABLE_SIZE;
+int   RANGE  = 1000;
 float INSERT = 0.33;
 float DELETE = 0.33;
 float SEARCH = 0.34;
@@ -27,9 +28,6 @@ float SEARCH = 0.34;
 struct MyKeyHash {
     unsigned long operator()(const int& k) const
     {
-#ifdef CONTENTION
-        return 0;
-#endif
         return k*48611;
     }
 };
@@ -66,12 +64,53 @@ int list_remove(struct list *L) {
     return x;
 }
 
-// The hashtable declaration
-HashMap<int, int, MyKeyHash> hmap;
+// The global map shared by all threads
+HashMap<int, string, MyKeyHash> hmap;
+// Each index stores vector of retired hash nodes for that thread
+// Indexing based on threadID, so list is isolated per thread 
+vector<HashNode<int, string> *> rlist[NUM_THREADS];
 
-// PER-THREAD PERFORMANCE TESTING
-/*******************************************************************************/
-void *performance(void *arg) {
+HPNode *HP[NUM_THREADS * 3];
+
+// Also adapted from http://www.drdobbs.com/lock-free-data-structures-with-hazard-po/184401890
+// Based on Michael's paper
+
+void Scan(HPNode *head, int threadNum) {
+    // Stage 1: Scan hazard pointers list
+    // collecting all non-null ptrs
+    vector<void*> hp;
+    while (head) {
+        void *p = head->ptr;
+        if (p) hp.push_back(p);
+        head = head->next;
+    }
+    // Stage 2: sort the hazard pointers
+    sort(hp.begin(), hp.end(), less<void*>());
+    // Stage 3: Search based on this thread's retired nodes 
+    vector<HashNode<int,string> *>::iterator i = rlist[threadNum].begin();
+    while (i != rlist[threadNum].end()) {
+        if (!binary_search(hp.begin(), hp.end(), *i)) {
+            delete *i;
+            if (&*i != &rlist[threadNum].back()) {
+                *i = rlist[threadNum].back();
+            }
+            rlist[threadNum].pop_back();
+        } else {
+            ++i;
+        }
+    }
+}
+
+// called in place of delete for a node in our hash table
+void DeleteNode(HashNode<int,string> *entry, int threadNum) {
+    rlist[threadNum].push_back(entry);
+    if (rlist[threadNum].size() >= RLIST_MAX_SIZE) {
+        Scan(HPNode::Head(), threadNum);
+    }
+}
+
+// PERFORMANCE TESTING
+void *threadPerf(void *arg) {
     int threadNum = (long) arg;
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -81,14 +120,13 @@ void *performance(void *arg) {
 
     for(int i = 0; i < OPS; i++) {
         // choose element uniformly over specified range
-        int key = dis(gen);
-        int val = 0;
+        int val = dis(gen);
         // use to choose operation based on given probabilities 
         float p = (float)rand()/(float)(RAND_MAX);
         if (p < INSERT) { 
             // choose insert
-            hmap.put(key, val);  
-            list_insert(L, key); 
+            hmap.put(val, to_string(val));  
+            list_insert(L, val); 
         }
         else if (p < INSERT + DELETE) { 
             // choose delete, only on elements this thread inserted
@@ -100,44 +138,31 @@ void *performance(void *arg) {
         }
         else { 
             // choose search 
-            int value;
-            hmap.get(key, value);   
+            string value;
+            hmap.get(val, value);   
         }
     }
     return NULL;
 }
-/*******************************************************************************/
 
-// PER-THREAD CORRECTNESS TESTING
-/*******************************************************************************/
-void *correctness(void *arg) {
-    // If you want correctness testing on higher contention then
-    // just uncomment the CONTENTION flag on the top of the file, this
-    // just makes the hashtable essentially become a linked list
-    // (only suitable for lock-free ofc)
+// CORRECTNESS TESTING
+void *threadRoutine(void *arg) {
     int threadNum = (long) arg;
 
     for(int i = threadNum; i < 100000; i+=NUM_THREADS) {
-        int key = i;
-        int val = 0;
-        hmap.put(key, val);
-        int value;
-        bool result = hmap.get(key, value);
-        assert(result);
-        assert(value == 0);
+        hmap.put(i, to_string(i));
+        string value;
+        bool result = hmap.get(i, value);
+        assert(value == to_string(i));
     }
-    
-    for(int i = threadNum; i < 100000; i+=NUM_THREADS) {
-        int key = i;
-        int value;
-        hmap.remove(key);
-        bool result = hmap.get(key, value);
+    for(int i = threadNum; i < 10000; i+=NUM_THREADS) {
+        hmap.remove(i);
+        string value;
+        bool result = hmap.get(i, value);
         assert(!result);
     }
-
     return NULL;
 }
-/*******************************************************************************/
 
 int main(int argc, char **argv) 
 {
@@ -154,12 +179,12 @@ int main(int argc, char **argv)
         }
         else if (strcmp(argv[i], "-ops") == 0) {
             // number of operations per thread
-            int op = atoi(argv[i+1]);
-            if (op == 0) {
+            int top = atoi(argv[i+1]);
+            if (top == 0) {
                 printf("Invalid range specified\n");
                 return 1;
             }
-            OPS = op;
+            RANGE = top;
         }
         else if (strcmp(argv[i], "-put") == 0) {
             // relative proportion of inserts
@@ -188,26 +213,7 @@ int main(int argc, char **argv)
             }
             DELETE = rem;
         }
-        else if (strcmp(argv[i], "-load") == 0) {
-            // average load factor
-            int ld = atoi(argv[i+1]);
-            if (ld == 0) {
-                printf("Invalid load factor specified\n");
-                return 1;
-            } 
-            LOAD = ld;
-            RANGE = 2 * LOAD * TABLE_SIZE;
-        }
-        else if (strcmp(argv[i], "-threads") == 0) {
-            // number of threads to use
-            int thread = atoi(argv[i+1]);
-            if (thread == 0) {
-                printf("Invalid load factor specified\n");
-                return 1;
-            }
-            NUM_THREADS = thread;
-        } 
-
+    
     }
     printf("put: %f get: %f rem %f\n", INSERT, SEARCH, DELETE); 
     // need (put+get+rem) ~= 1, these are the relative ratios (probabilities) 
@@ -216,21 +222,14 @@ int main(int argc, char **argv)
         printf("Invalid put, get, remove ratios\n");
         return 1;
     }
-    // Prepopulate hash table based on assigned load factor 
-    for (int i = 0; i < LOAD * TABLE_SIZE; i++) {
-        hmap.put(i, 0);
-    } 
+    for (long i = NUM_THREADS * 3 - 1; i >= 0; i--) {
+        HP[i] = HPNode::Acquire();
+    }    
 
     double startTime = CycleTimer::currentSeconds();
     pthread_t threads[NUM_THREADS];
-    for(long i = 0; i < NUM_THREADS; i++) {
-#ifdef DEBUG
-        pthread_create(&threads[i], NULL, correctness, (void *)i);
-#endif
-#ifndef DEBUG
-        pthread_create(&threads[i], NULL, performance, (void *)i);
-#endif
-    }
+    for(long i = 0; i < NUM_THREADS; i++)
+        pthread_create(&threads[i], NULL, threadPerf, (void *)i);
 
     for(int i = 0; i < NUM_THREADS; i++)
         pthread_join(threads[i], NULL);
