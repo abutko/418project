@@ -75,8 +75,8 @@ could potentially lead to starvation since it provides no fairness guarantees </
 
 <p><u>Fine-grained:</u> In this implementation we used an array of pthread read-write locks, one per bucket of the table. Although this
 approach allows parallelization at bucket level as well, we found it to be slower than using mutex locks, one per bucket of the table. 
-This is because we expect O(1) access time at the bucket level and the overhead in the acquisiting of a pthread read-write lock 
-destroyed any potential gain obtained from parallelization a single bucket level. This approach could also lead to starvation.</p>
+This is because the overhead in the acquisiting of a pthread read-write lock 
+destroyed any potential gain obtained from parallelization in this way at a single bucket level. This approach could also lead to starvation.</p>
 
 <p><u>Lock-free:</u></p>
 
