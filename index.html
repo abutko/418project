@@ -112,17 +112,17 @@ number of inserts.</p>
 <a href="https://timharris.uk/papers/2001-disc.pdf">research paper</a> which the lock-free implementation is based on.</p>
 
 <p><strong>RESULTS</strong>
-Our testing methodology is based on the performance evaluation in Maged Michael's paper "High Performance Dynamic Lock-Free Hash Tables
+<u>Methodology:</u> Our testing methodology is based on the performance evaluation in Maged Michael's paper "High Performance Dynamic Lock-Free Hash Tables
 and List-Based Sets" (listed below). 
 We test the effects of varying the number threads, the range of keys used, the initial size of the table, and the ratio of different operations used on performance.
 Performance is measured as average CPU time per operation in microseconds (for a given experiment, this is simply the CPU time of the experiment divided by the number of threads).
-In every experiment, we fix the number of threads. Each thread performs 1 million operations chosen randomly with a predetermined ratio of put/delete/get operations.
+In every experiment, we fix the number of threads. Each thread performs 1 million operations on randomly chosen keys (using std::uniform_int_distribution) with a predetermined ratio of put/delete/get operations.
 Before measuring these operations, we prepopulate the hash table based on a chosen load factor. For load factor <strong>a</strong> and table size <strong>m</strong>, we initially add <strong>a * m </strong> elements and restrict the range of elements from 0 to <strong>2am</strong>.
 This was chosen based on the results Michael published to have a benchmark reference.
 Below, we compare our results (left) with Michael's (right). Adjacent images have the same features - a fixed average load factor as described above, the same relative proportion of operations, and a table size of 100.
-A discussion of the results follows below the figures.
+A discussion of the results follows below the figures. W
 </p>
-<p>
+<p> <u>Performance plots:</u>
   <div id="parent" width="1500">
   <img src="images/avg11.jpg" alt="a11" height="180">      
   <img src="images/Michael_11.png" alt="m11" height="180"><br>
@@ -169,6 +169,19 @@ A discussion of the results follows below the figures.
   <div style="clear:both"></div>
 </div>
 </p>
+<p><u>Systems:</u> First, we consider the platform used for the experiment and how this may impact the performance. 
+Michael's paper states a 4-processor (375 MHz 604e) IBM PowerPC multiprocessor was used in his experiments.
+The specifications state that the 604e is a superscalar processor capable of issuing 4 instructions simultaneously. 
+Given this and that he uses a 4-way multiprocessor, the choice to measure a maximum of 16 execution threads is reasonable.
+Our experiment mirrors this decision, though the architecture is much different. Our experiments were run on the GHC machines (specifically, ghc26). 
+The processor is an Intel Xeon W3670. It is a 6 core processor with 12 threads. We still test up to 16 threads for a more accurate comparison with Michael's results.
+Because of the vast differences in processor architecture, any strictly numerical comparisons between the sets of results is not extremely useful.
+However, we hope to notice similar trends in comparing the two experiments.
+</p>
+<p><u>Analysis:</u> Michael's fi
+  
+</p>
+
 
 <p><strong>REFERENCES.</strong></p>
 
@@ -182,6 +195,9 @@ A discussion of the results follows below the figures.
 
 <p><a href="https://en.wikipedia.org/wiki/Hash_table">https://en.wikipedia.org/wiki/Hash_table</a></p>
 
+<p><a href="http://www.nxp.com/files/32bit/doc/data_sheet/MPC604E.pdf">http://www.nxp.com/files/32bit/doc/data_sheet/MPC604E.pdf</a></p>
+
+<p><a href="http://ark.intel.com/products/47918/Intel-Xeon-Processor-W3670-12M-Cache-3_20-GHz-4_80-GTs-Intel-QPI">http://ark.intel.com/products/47918/Intel-Xeon-Processor-W3670-12M-Cache-3_20-GHz-4_80-GTs-Intel-QPI</a></p>
 <p><strong>WORK BY EACH STUDENT.</strong></p>
 
 <p>Equal work was performed by both project members.</p>
