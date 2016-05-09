@@ -111,7 +111,8 @@ number of inserts.</p>
 <a href=https://github.com/abutko/418project/tree/gh-pages/code>code</a> on github or the 
 <a href="https://timharris.uk/papers/2001-disc.pdf">research paper</a> which the lock-free implementation is based on.</p>
 
-<p><strong>RESULTS</strong>
+<p><strong>RESULTS.</strong></p>
+<p>
 <u>Methodology:</u> Our testing methodology is based on the performance evaluation in Maged Michael's paper "High Performance Dynamic Lock-Free Hash Tables
 and List-Based Sets" (listed below). 
 We test the effects of varying the number threads, the range of keys used, the initial size of the table, and the ratio of different operations used on performance.
@@ -120,7 +121,7 @@ In every experiment, we fix the number of threads. Each thread performs 1 millio
 Before measuring these operations, we prepopulate the hash table based on a chosen load factor. For load factor <strong>a</strong> and table size <strong>m</strong>, we initially add <strong>a * m </strong> elements and restrict the range of elements from 0 to <strong>2am</strong>.
 This was chosen based on the results Michael published to have a benchmark reference.
 Below, we compare our results (left) with Michael's (right). Adjacent images have the same features - a fixed average load factor as described above, the same relative proportion of operations, and a table size of 100.
-A discussion of the results follows below the figures. W
+A discussion of the results follows below the figures.
 </p>
 <p> <u>Performance plots:</u>
   <div id="parent" width="1500">
@@ -174,12 +175,20 @@ Michael's paper states a 4-processor (375 MHz 604e) IBM PowerPC multiprocessor w
 The specifications state that the 604e is a superscalar processor capable of issuing 4 instructions simultaneously. 
 Given this and that he uses a 4-way multiprocessor, the choice to measure a maximum of 16 execution threads is reasonable.
 Our experiment mirrors this decision, though the architecture is much different. Our experiments were run on the GHC machines (specifically, ghc26). 
-The processor is an Intel Xeon W3670. It is a 6 core processor with 12 threads. We still test up to 16 threads for a more accurate comparison with Michael's results.
+The processor is an Intel Xeon W3670. It is a 6 core processor with 12 threads at 3.2 GHz. We still test up to 16 threads for a more accurate comparison with Michael's results.
 Because of the vast differences in processor architecture, any strictly numerical comparisons between the sets of results is not extremely useful.
 However, we hope to notice similar trends in comparing the two experiments.
 </p>
-<p><u>Analysis:</u> Michael's fi
-  
+<p><u>Analysis:</u> First, we touch on Michael's findings as shown above. He found that his algorithm improved over Harris's when considering memory management (without, the performance was nearly identical).
+With memory management, Harris's performed worse than the lock-based implementations. He also tested both reader-writer locks and mutex locks and noted 
+reader-writer locks are better with a higher percentage of search operations.
+</p>
+<p>
+Now we look at our results.
+</p>
+<p>
+We can compare Michael's harris-no-mem-mng plot with our lockfree and his multi-mutex with our fine.
+Between the sets of experiments, these are the most similar implementations and we would expect similar trends in both.
 </p>
 
 
