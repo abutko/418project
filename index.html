@@ -175,7 +175,8 @@ Michael's paper states a 4-processor (375 MHz 604e) IBM PowerPC multiprocessor w
 The specifications state that the 604e is a superscalar processor capable of issuing 4 instructions simultaneously. 
 Given this and that he uses a 4-way multiprocessor, the choice to measure a maximum of 16 execution threads is reasonable.
 Our experiment mirrors this decision, though the architecture is much different. Our experiments were run on the GHC machines (specifically, ghc26). 
-The processor is an Intel Xeon W3670. It is a 6 core processor with 12 threads at 3.2 GHz. We still test up to 16 threads for a more accurate comparison with Michael's results.
+Because we were testing on a shared computing resource without direct control over the scheduling of pthreads or other users' processes, we ran each trial several times and took the minumum timing reasoning this will highlight the maximum performance of the different implementations.
+The processor on the Gates machine is an Intel Xeon W3670. It is a 6 core processor with 12 threads at 3.2 GHz. We still test up to 16 threads for a more accurate comparison with Michael's results.
 Because of the vast differences in processor architecture, any strictly numerical comparisons between the sets of results is not extremely useful.
 However, we hope to notice similar trends in comparing the two experiments.
 </p>
@@ -184,11 +185,23 @@ With memory management, Harris's performed worse than the lock-based implementat
 reader-writer locks are better with a higher percentage of search operations.
 </p>
 <p>
-Now we look at our results.
+Now we look at our results. Generally, the lock-free implementation performs better than the fine-grain locking, which in turn is better than the coarse-grain locking.
+This separation is more pronounced when we have a higher proportion of insert and delete operations as we would expect.
+The average operation in the coarse-grain implementation takes around 2-3x as long compared to fine-grain and lock-free, while the difference in the latter case is much less pronounced.
+As we increase the average load factor, we find the overall performance degrades (as would be expected), while the difference between fine-grain and lock-free almost disappears.
+Michael's paper did not consider resizing schemes (which we then also did not include in this analysis) which would be an good place to look to in order to improve performance.
+Across all experiments, we see the performance of coarse-grain decline up to 8 or 12 threads and then actually improve with 16. We suspect this may be due to some kind of latency hiding because the processor has 12 threads.
+The fine-grain and lock-free converge between 0.25 and 0.3 microseconds per operation across all experiments.
+This suggests our program is compute-bound. To confirm this, future tests could either explore a machine with a higher processor speed or with more available threads to get a more accurate picture of how 
+these particular implementations scale with respect to the number of threads.
 </p>
 <p>
-We can compare Michael's harris-no-mem-mng plot with our lockfree and his multi-mutex with our fine.
+We can compare Michael's harris-no-mem-mng plot with our lock-free and his multi-mutex with our fine-grain.
 Between the sets of experiments, these are the most similar implementations and we would expect similar trends in both.
+There is a similar plateau in the performance as the number of threads scales looking at the first case, again suggesting a compute-bound program.
+In both cases we also see the overall performance decline as the average load factor increases (again, not unexpected).
+Our testing showed the performance of the fine-grain locking and lock-free to be much closer than that observed by Michael, but we have no suggestions to resolve this difference.
+We don't observe the "peak" effected noted above in the coarse-grain scheme, though Michael did not publish any results for this implementation so we have no benchmark to compare this to.
 </p>
 
 
