@@ -118,6 +118,8 @@ We test the effects of varying the number threads, the range of keys used, the i
 In every experiment, we fix the number of threads. Each thread performs 1 million operations chosen randomly with a predetermined ratio of put/delete/get operations.
 Before measuring these operations, we prepopulate the hash table based on a chosen load factor. For load factor <strong>a</strong> and table size <strong>m</strong>, we initially add <strong>a * m </strong> elements and restrict the range of elements from 0 to <strong>2am</strong>.
 This was chosen based on the results Michael published to have a benchmark reference.
+Below, we compare our results (left) with Michael's (right). Adjacent images have the same features - a fixed average load factor as described above, the same relative proportion of operations, and a table size of 100.
+A discussion of the results follows below the figures.
 </p>
 <p>
   <div id="parent" width="1500">
@@ -125,16 +127,19 @@ This was chosen based on the results Michael published to have a benchmark refer
   <img src="images/Michael_11.png" alt="m11" height="200"><br>
   <div style="clear:both"></div>
 </div>
-<p>
 <div id="parent" width="1500">
   <img src="images/avg12.jpg" alt="a12" height="200">      
   <img src="images/Michael_12.png" alt="m12" height="200"><br>
   <div style="clear:both"></div>
 </div>
-</p>
 <div id="parent" width="1500">
   <img src="images/avg13.jpg" alt="a13" height="200">      
   <img src="images/Michael_13.png" alt="m13" height="200"><br>
+  <div style="clear:both"></div>
+</div><br>
+<div id="parent" width="1500">
+  <img src="images/avg51.jpg" alt="a51" height="200">      
+  <img src="images/Michael_51.png" alt="m51" height="200"><br>
   <div style="clear:both"></div>
 </div><br>
 </p>
