@@ -111,11 +111,19 @@ number of inserts.</p>
 <a href=https://github.com/abutko/418project/tree/gh-pages/code>code</a> on github or the 
 <a href="https://timharris.uk/papers/2001-disc.pdf">research paper</a> which the lock-free implementation is based on.</p>
 
-<p><strong>PRELIMINARY RESULTS</strong>
-With our testing suite we have seen a performance improvement with the fine-grain locking as expected. We tested this with
-std::mutex and pthread reader-writer locks and found mutex locks had better performance. As we just completed the testing harness,
-we still need to compile an intial performance report (speedup graphs). This is the first goal listed on the updated 
-schedule above.
+<p><strong>RESULTS</strong>
+Our testing methodology is based on the performance evaluation in Maged Michael's paper "High Performance Dynamic Lock-Free Hash Tables
+and List-Based Sets" (listed below). 
+We test the effects of varying the number threads, the range of keys used, the initial size of the table, and the ratio of different operations used on performance measured as average CPU time per operation.
+In every experiment, we fix the number of threads. Each thread performs 1 million operations chosen randomly with a predetermined ratio of put/delete/get operations.
+Before measuring these operations, we prepopulate the hash table based on a chosen load factor. For load factor <strong>a</strong> and table size <strong>m</strong>, we initially add <strong>a * m </strong> elements and restrict the range of elements from 0 to <strong>2am</strong>.
+This was chosen based on the results Michael published to have a benchmark reference.
+</p>
+<p>
+  <figure>
+  <img src="images/Michael_101.tiff" alt="michael101">
+</figure><br>
+  
 </p>
 
 <p><strong>REFERENCES.</strong></p>
